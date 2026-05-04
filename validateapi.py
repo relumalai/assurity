@@ -1,19 +1,24 @@
 # Import needed packages
 
 import os
-from dotenv import load_dotenv
 import requests
-from requests.exceptions import HTTPError, ConnectionError, JSONDecodeError, RequestException
 import jmespath
 import pydantic
 
+from tabulate import tabulate
+from requests.exceptions import HTTPError, ConnectionError, JSONDecodeError, RequestException
+from dotenv import load_dotenv
 
+#Custom Generic API Error class
 class ErrInFetchingAPI(Exception):
     pass
 
-
+#Main class for the solution
 class ValidateAPI:
 
+# read the url, path and query parameter from a config file,
+#can be extended to run in different path, query parameter or different url point to different env
+ 
     def __init__(self):
         #intial values
         load_dotenv()
@@ -30,6 +35,7 @@ class ValidateAPI:
         if "ErrorDescription" in self.responsedata:
             raise ErrInFetchingAPI("There seems to be error, with the request, unable to proceed.") 
 
+#fetches the reposnse for the api and handle usual error
 
     def fetch_response(self):
         try:
@@ -37,7 +43,7 @@ class ValidateAPI:
             apiresponse.raise_for_status()
             return apiresponse.json()
         except HTTPError as http_err:
-             HTTPError(f'http error: {http_err} occured')
+            print(f'http error: {http_err} occured')
         except ConnectionError as con_err:
             print(f'Unable to connect to endpoint: {con_err}')
         except JSONDecodeError as jsonres_err:
@@ -45,25 +51,57 @@ class ValidateAPI:
         except RequestException as err:
             print(f'Unexpected Error: {err}')
 
-    def validate_name(self):
-        assert self.responsedata["Name"] == "Carbon credits"
+# helper method to collate the results, make it easier read and format the results. 
+    
+    def _results(self,test,actual,expected):
+        return {
+                "Test" : test,
+                "Actual" : actual,
+                "Expected" : expected,
+                "Result": "Pass" if actual == expected else "Fail"
+                }
+    
+#---------------- validation metods--------------------#
+#read the value, returns erron case key is not found and fails the va;idation
+#allows to continue with other validation
+
+    def validate_name(self,expected_name):
+        try:
+            value_in_response = self.responsedata["Name"]
+        except KeyError:
+            return self._results("Validate Name","Field missing form response",expected_name)
+        return self._results("Validate Name",value_in_response,expected_name)
 
 
-    def validate_relist(self):
-        assert self.responsedata["CanRelist"] is True
+    def validate_relist(self, expected_relist_state: bool):
+        try:
+            state_of_relist = self.responsedata["CanRelist"]
+        except KeyError:
+            return self._results("Validate CanReList State","Field missing from response",True)
+        return self._results("Validate CanReList State",state_of_relist,expected_relist_state)
+        
 
-    def validate_promotion(self):
-        description = next((value["Description"] for value in self.responsedata["Promotions"] if value["Name"] == "Gallery"), None)
-        assert description == "Good position in category"
+    def validate_promotion(self, promotion_name, expected_promotion_gallery_description):
+        try:
+            description = next((value["Description"] for value in self.responsedata["Promotions"] if value["Name"] == promotion_name), None)
+        except KeyError:
+            return self._results("Validate Promotion-Gallery's Description","Filed missing from response",expected_promotion_gallery_description)
+        return self._results("Validate Promotion-Gallery's Description",description,expected_promotion_gallery_description)
 
-
+#--------------- simple way to run the code-------------------
+#can be extend to a commadline tool, calls all test by default
 
 if __name__ == '__main__':
-    testapi = ValidateAPI()
-    testapi.validate_name()
-    testapi.validate_relist()
-    testapi.validate_promotion()
-
-
-
-
+    try:
+        testapi = ValidateAPI()
+        result=[
+                testapi.validate_name(expected_name="Carbon credit"),
+                testapi.validate_name(expected_name="Carbon credits"),
+                testapi.validate_relist(expected_relist_state=True),
+                testapi.validate_relist(expected_relist_state=False),
+                testapi.validate_promotion(promotion_name="Gallery",expected_promotion_gallery_description="Good position in category"),
+                testapi.validate_promotion(promotion_name="Gallery",expected_promotion_gallery_description="Low position in category"),
+                ]
+        print(tabulate(result, headers="keys", tablefmt="grid"))
+    except ErrInFetchingAPI as err:
+        print(f'Validation cannot be run due to error {err}')

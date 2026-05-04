@@ -4,3 +4,4 @@ dotenv
 requests
 jmespath
 pydantic
+tabulate
