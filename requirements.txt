@@ -1,0 +1,6 @@
+#packages for running the code
+
+dotenv
+requests
+jmespath
+pydantic
