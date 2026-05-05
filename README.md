@@ -27,8 +27,11 @@ pydantic - A more robust validation method. I the absense of schema, i will assu
 3. create a .env file as below
    
    BASE_URL= "https://api.tmsandbox.co.nz/v1"
+   
    CATALOGUE= false
+   
    CATEGORY_ID= 6327
+   
    
 5. run python -m pip install -r requirements.txt
 6. Run validateapi.py
