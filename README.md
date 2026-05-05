@@ -32,3 +32,27 @@ pydantic - A more robust validation method. I the absense of schema, i will assu
    
 5. run python -m pip install -r requirements.txt
 6. Run validateapi.py
+7. or you could run the github action
+
+And seccond approch is also added and the implemetation is under the approach-v2 folder
+The apprach implements 
+- validation using jmespath (jq equivalent for querying json, especially used for nested json.)
+- validation using pydantic. A partial define model is defined and the response is check against this model. Pydantic enforces strict validate of the response againg the model.
+- Validation using native python. Same as validateapi.py
+
+
+├── approach2
+│   ├── JmespathValidator.py - jmespath implementation of validations
+│   ├── models.py            - pydantic model (partial, generated from response in absense of api schema)
+│   ├── nativevalidation.py  - Native implementation of the validation
+│   ├── PydanticValidator.py - Pydantic implementation of the validation
+│   ├── runvalidation.py    - Simple test calling 
+│   └── validateapi_core.py - Core Orchestrating class inheriting native,pydatic and jmespath class
+├── LICENSE
+├── lintreport.txt
+├── README.md
+├── requirements.txt
+└── validateapi.py    
+
+8. run approach-v2/runvalidations.py
+
