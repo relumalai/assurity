@@ -1,6 +1,6 @@
 # Assurity - code for API response validation.
 
-## API -  https://api.tmsandbox.co.nz/v1/Categories/6327/Details.json?catalogue=false
+### API -  https://api.tmsandbox.co.nz/v1/Categories/6327/Details.json?catalogue=false
 
 ### Validate response for
 
@@ -19,14 +19,16 @@ pydantic - A more robust validation method. I the absense of schema, i will assu
 
 1. The code is being run on Windows/Linux/MacOS with python version > 3.10, and pip
 2. Has access to internet to downlaod the necessary packages.
-3. 
 
 ### How to run the test.
 
 1. clone the repo
-2. activate the virtual Env
-3. run the assurity.py
-
-
-
-
+2. If you are using a virtual environment for python, activate it.
+3. create a .env file as below
+   
+   BASE_URL= "https://api.tmsandbox.co.nz/v1"
+   CATALOGUE= false
+   CATEGORY_ID= 6327
+   
+5. run python -m pip install -r requirements.txt
+6. Run validateapi.py
