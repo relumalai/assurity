@@ -41,3 +41,4 @@ jobs:
           CATEGORY_ID: ${{vars.CATEGORY_ID}}
       run: |
         python validateapi.py
+        python approach2/runvalidation.py
